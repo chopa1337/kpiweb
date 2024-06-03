@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dog Adoption Gallery</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #121212; /* dark background for night mode */
+            color: #ffffff;
+            margin: 0;
+            padding: 50px;
+        }
+
+        .dogs-container {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        .dog-card {
+            display: flex;
+            align-items: center;
+            background-color: #1e1e1e;
+            padding: 15px;
+            border: 1px solid #333;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+
+        .dog-card:hover {
+            background-color: #2e2e2e;
+        }
+
+        .dog-card img {
+            border-radius: 50%;
+            margin-right: 15px;
+        }
+
+        .dog-card div {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            overflow: auto;
+            background-color: rgba(0, 0, 0, 0.7);
+        }
+
+        .modal-content {
+            background-color: #1e1e1e;
+            margin: 10% auto;
+            padding: 25px;
+            border: 1px solid #444;
+            width: 70%;
+            max-width: 700px;
+            border-radius: 10px;
+            color: #ffffff;
+        }
+
+        .close-button {
+            color: #aaa;
+            float: right;
+            font-size: 30px;
+            font-weight: bold;
+        }
+
+        .close-button:hover,
+        .close-button:focus {
+            color: #fff;
+            text-decoration: none;
+            cursor: pointer;
+        }
+
+        .adopt-button {
+            background-color: #6200ea;
+            color: white;
+            border: none;
+            padding: 10px 25px;
+            font-size: 16px;
+            margin-top: 20px;
+            cursor: pointer;
+            border-radius: 8px;
+            transition: background-color 0.3s;
+        }
+
+        .adopt-button:hover {
+            background-color: #3700b3;
+        }
+    </style>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+</head>
+<body>
+    <div class="dogs-container" id="dogs-container"></div>
+
+    <div class="modal" id="modal">
+        <div class="modal-content" id="modal-content">
+            <span class="close-button" id="close-button">&times;</span>
+        </div>
+    </div>
+
+    <script>
+        $(document).ready(function() {
+            const dogsContainer = $('#dogs-container');
+            const modal = $('#modal');
+            const modalContent = $('#modal-content');
+            const closeButton = $('#close-button');
+
+            closeButton.on('click', function() {
+                modal.hide();
+            });
+
+            $(window).on('click', function(event) {
+                if (event.target == modal[0]) {
+                    modal.hide();
+                }
+            });
+
+            $.get('https://usersdogs.dmytrominochkin.cloud/dogs', function(data) {
+                data.forEach(dog => {
+                    const dogCard = $(`
+                        <div class="dog-card">
+                            <img src="https://usersdogs.dmytrominochkin.cloud${dog.dogImage}" alt="${dog.title}" width="60" height="60">
+                            <div>
+                                <strong>${dog.title}</strong>
+                                <span>${dog.sex.toLowerCase()}</span>
+                            </div>
+                        </div>
+                    `);
+                    dogCard.on('click', function() {
+                        showDogDetails(dog);
+                    });
+                    dogsContainer.append(dogCard);
+                });
+            }).fail(function() {
+                console.error('Error fetching dogs');
+            });
+
+            function showDogDetails(dog) {
+                modalContent.html(`
+                    <span class="close-button" id="close-button">&times;</span>
+                    <img src="https://usersdogs.dmytrominochkin.cloud${dog.dogImage}" alt="${dog.title}" width="100%">
+                    <h2>${dog.title}</h2>
+                    <p><strong>Sex:</strong> ${dog.sex}</p>
+                    <p><strong>Age:</strong> ${dog.age}</p>
+                    <p>${dog.description}</p>
+                    <button class="adopt-button" onclick="adoptDog(${dog.id})">Adopt Me</button>
+                `);
+                modal.show();
+
+                $('.close-button').on('click', function() {
+                    modal.hide();
+                });
+            }
+        });
+
+        function adoptDog(dogId) {
+            alert('Thank you for adopting dog ID: ' + dogId);
+        }
+    </script>
+</body>
+</html>
